@@ -1,0 +1,1 @@
+/Users/vic/.config/p10k/p10k.zsh

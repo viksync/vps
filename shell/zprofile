@@ -1,0 +1,28 @@
+# ----------------------------------------
+# PATH Configuration
+# This is the single source of truth for PATH ordering
+# Runs once at login before .zshrc
+# ----------------------------------------
+
+# Start with a clean slate
+path=()
+
+# User scripts & tools
+path+=(
+    "$HOME/.config/shell/scripts"
+    "$HOME/.local/bin"
+)
+
+# System paths (lowest priority, as fallback)
+path+=(
+    /usr/local/bin
+    /usr/local/sbin
+    /usr/bin
+    /usr/sbin
+    /bin
+    /sbin
+)
+
+# Deduplicate and export
+typeset -U path
+export PATH
