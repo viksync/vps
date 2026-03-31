@@ -1,41 +1,61 @@
 #!/usr/bin/env bash
-# Materializes symlinks pointing outside the repo into real file content in the
-# git index. Working-tree symlinks are left untouched.
+# Refreshes all symlink-backed files in the git index with current content,
+# then materializes any newly staged symlinks.
 set -euo pipefail
 
 REPO_ROOT=$(git rev-parse --show-toplevel)
 
-add_file() {   # <target-path> <index-path>
+resolve_target() {   # <abs-symlink-path> → prints absolute target path
+  local target
+  target=$(readlink "$1")
+  [[ "$target" != /* ]] && target="$(cd "$(dirname "$1")" && pwd)/$target"
+  echo "$target"
+}
+
+symlink_parent_target() {   # <repo-relative-path> → prints actual file path
+  local rel="$1" prefix="" part
+  while IFS= read -r part; do
+    prefix="${prefix:+$prefix/}$part"
+    if [[ -L "$REPO_ROOT/$prefix" ]]; then
+      local base
+      base=$(resolve_target "$REPO_ROOT/$prefix")
+      echo "$base/${rel#$prefix/}"
+      return 0
+    fi
+  done < <(echo "$rel" | tr '/' '\n' | head -n -1)
+  return 1
+}
+
+materialize() {   # <actual-file-path> <index-path>
   local blob
   blob=$(git hash-object -w "$1")
   git update-index --add --cacheinfo "100644,$blob,$2"
 }
 
-add_dir() {    # <target-dir> <index-prefix>
-  local target_dir="$1" prefix="$2"
-  git rm --cached -q "$prefix" 2>/dev/null || true
-  while IFS= read -r -d '' f; do
-    add_file "$f" "$prefix/${f#"$target_dir"/}"
-  done < <(find "$target_dir" -type f ! -name '.DS_Store' -print0 | sort -z)
-}
+# Refresh all skip-worktree files (symlink-backed files from previous commits)
+while IFS= read -r rel; do
+  abs="$REPO_ROOT/$rel"
+  if [[ -L "$abs" ]]; then
+    actual=$(resolve_target "$abs")
+    [[ -f "$actual" ]] && materialize "$actual" "$rel"
+  else
+    actual=$(symlink_parent_target "$rel") || continue
+    [[ -f "$actual" ]] && materialize "$actual" "$rel"
+  fi
+done < <(git ls-files -v | awk '/^S/{print $2}')
 
-# Snapshot staged paths before mutating the index
-staged=()
-while IFS= read -r line; do
-  staged+=("$line")
-done < <(git diff --cached --name-only)
-
-for rel in "${staged[@]}"; do
+# Materialize any newly staged symlinks (first-time additions)
+while IFS= read -r rel; do
   abs="$REPO_ROOT/$rel"
   [[ -L "$abs" ]] || continue
-
-  target=$(readlink "$abs")
-  [[ "$target" != /* ]] && target="$(cd "$(dirname "$abs")" && pwd)/$target"
-  [[ "$target" == "$REPO_ROOT"/* ]] && continue   # intra-repo symlink, skip
-
-  if [[ -f "$target" ]]; then
-    add_file "$target" "$rel"
-  elif [[ -d "$target" ]]; then
-    add_dir "$target" "$rel"
+  actual=$(resolve_target "$abs")
+  [[ "$actual" == "$REPO_ROOT"/* ]] && continue  # intra-repo symlink, skip
+  if [[ -f "$actual" ]]; then
+    materialize "$actual" "$rel"
+  elif [[ -d "$actual" ]]; then
+    git rm --cached -q "$rel" 2>/dev/null || true
+    while IFS= read -r -d '' f; do
+      materialize "$f" "$rel/${f#$actual/}"
+    done < <(find "$actual" -type f ! -name '.DS_Store' -print0 | sort -z)
   fi
-done
+done < <(git diff --cached --name-only)
