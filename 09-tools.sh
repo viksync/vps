@@ -17,14 +17,14 @@ ok "Directories ready"
 # ----------------------------------------
 # 2. Symlinks
 # ----------------------------------------
-symlink "$TOOLS_DIR/yazi/yazi.toml"    "$HOME/.config/yazi/yazi.toml"
-symlink "$TOOLS_DIR/yazi/theme.toml"   "$HOME/.config/yazi/theme.toml"
+symlink "$TOOLS_DIR/yazi/yazi.toml" "$HOME/.config/yazi/yazi.toml"
+symlink "$TOOLS_DIR/yazi/theme.toml" "$HOME/.config/yazi/theme.toml"
 symlink "$TOOLS_DIR/yazi/package.toml" "$HOME/.config/yazi/package.toml"
-symlink "$TOOLS_DIR/zellij.kdl"        "$HOME/.config/zellij/config.kdl"
+symlink "$TOOLS_DIR/zellij.kdl" "$HOME/.config/zellij/config.kdl"
 ok "Symlinks created"
 
 # ----------------------------------------
 # 3. Yazi packages (flavors / plugins)
 # ----------------------------------------
-ya pkg --install
+ya pkg install
 ok "Yazi packages installed"
