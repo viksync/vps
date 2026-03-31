@@ -59,7 +59,7 @@ bash "$REPO_DIR/02-user.sh"
 if ! sudo -u "$VPS_USER" test -r "$REPO_DIR/utils.sh" 2>/dev/null; then
   NEW_REPO_DIR="/home/$VPS_USER/vps"
   info "Repo not readable by $VPS_USER — copying to $NEW_REPO_DIR"
-  cp -rL "$REPO_DIR" "$NEW_REPO_DIR"
+  cp -r "$REPO_DIR" "$NEW_REPO_DIR"
   chown -R "$VPS_USER:$VPS_USER" "$NEW_REPO_DIR"
   chmod -R u+rX "$NEW_REPO_DIR"
   REPO_DIR="$NEW_REPO_DIR"

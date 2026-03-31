@@ -1,0 +1,41 @@
+#!/usr/bin/env bash
+# Materializes symlinks pointing outside the repo into real file content in the
+# git index. Working-tree symlinks are left untouched.
+set -euo pipefail
+
+REPO_ROOT=$(git rev-parse --show-toplevel)
+
+add_file() {   # <target-path> <index-path>
+  local blob
+  blob=$(git hash-object -w "$1")
+  git update-index --add --cacheinfo "100644,$blob,$2"
+}
+
+add_dir() {    # <target-dir> <index-prefix>
+  local target_dir="$1" prefix="$2"
+  git rm --cached -q "$prefix" 2>/dev/null || true
+  while IFS= read -r -d '' f; do
+    add_file "$f" "$prefix/${f#"$target_dir"/}"
+  done < <(find "$target_dir" -type f ! -name '.DS_Store' -print0 | sort -z)
+}
+
+# Snapshot staged paths before mutating the index
+staged=()
+while IFS= read -r line; do
+  staged+=("$line")
+done < <(git diff --cached --name-only)
+
+for rel in "${staged[@]}"; do
+  abs="$REPO_ROOT/$rel"
+  [[ -L "$abs" ]] || continue
+
+  target=$(readlink "$abs")
+  [[ "$target" != /* ]] && target="$(cd "$(dirname "$abs")" && pwd)/$target"
+  [[ "$target" == "$REPO_ROOT"/* ]] && continue   # intra-repo symlink, skip
+
+  if [[ -f "$target" ]]; then
+    add_file "$target" "$rel"
+  elif [[ -d "$target" ]]; then
+    add_dir "$target" "$rel"
+  fi
+done
