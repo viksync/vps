@@ -46,8 +46,7 @@ EOF
 '
 
 spin "Enabling Docker service" sudo systemctl enable --now docker.service
-spin "Enablind containerd" sudo systemctl enable --now containerd.service
+spin "Enabling containerd" sudo systemctl enable --now containerd.service
 
 usermod -aG docker "$VPS_USER"
-newgrp docker
 ok "Added $VPS_USER to docker group"
