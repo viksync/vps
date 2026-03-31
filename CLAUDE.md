@@ -1,12 +1,9 @@
 This repo bootstraps work environment on Ubuntu VPS
 
-## Dev setup (once per clone)
+`symlinks` lists files tracked from outside of repo.
+Format - `dest<TAB>source`.
+Pre-commit hook copies fresh content from each source into repo and stages it.
+Setup hook after clone - git config core.hooksPath .githooks
 
-```
-git config core.hooksPath .githooks
-git ls-files | xargs -I{} sh -c 'test -L {} && git update-index --skip-worktree {}' 2>/dev/null; true
-```
-
-`shell/` and `tools/` contain symlinks to the local dotfiles. The pre-commit hook
-materializes them into real file content in the git index so the VPS receives
-actual files on clone. Working-tree symlinks are never modified.
+To add new "symlink":
+./add-symlink tools/starship.toml /Users/vic/.config/starship.toml

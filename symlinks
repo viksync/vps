@@ -1,0 +1,10 @@
+tools/zellij.kdl	/Users/vic/.config/zellij/config.kdl
+tools/yazi/package.toml	/Users/vic/.config/yazi/package.toml
+tools/yazi/yazi.toml	/Users/vic/.config/yazi/yazi.toml
+tools/yazi/theme.toml	/Users/vic/.config/yazi/theme.toml
+shell/p10k.zsh	/Users/vic/.config/p10k/p10k.zsh
+shell/aliases.base.zsh	/Users/vic/.config/shell/aliases.base.zsh
+shell/zshenv	/Users/vic/.config/shell/zshenv
+shell/zshrc.base	/Users/vic/.config/shell/zshrc.base
+shell/scripts	/Users/vic/.config/shell/scripts
+shell/aliases/portable	/Users/vic/.config/shell/aliases/portable

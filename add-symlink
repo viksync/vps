@@ -1,0 +1,38 @@
+#!/usr/bin/env bash
+# Usage: ./add-symlink <dest> <source>
+#   dest:   path relative to repo root  (e.g. tools/foo.conf)
+#   source: absolute path to file or folder
+set -euo pipefail
+
+REPO_ROOT=$(git rev-parse --show-toplevel)
+SYMLINKS="$REPO_ROOT/symlinks"
+
+if [[ $# -ne 2 ]]; then
+  echo "usage: $(basename "$0") <dest> <source>" >&2
+  exit 1
+fi
+
+dest="$1"
+src="$2"
+
+[[ -e "$src" ]] || { echo "error: source does not exist: $src" >&2; exit 1; }
+
+if grep -qP "^${dest}\t" "$SYMLINKS" 2>/dev/null; then
+  echo "error: '$dest' already exists in symlinks" >&2
+  exit 1
+fi
+
+printf '%s\t%s\n' "$dest" "$src" >> "$SYMLINKS"
+
+# Copy into repo immediately so the file is available before the next commit
+abs_dest="$REPO_ROOT/$dest"
+mkdir -p "$(dirname "$abs_dest")"
+if [[ -d "$src" ]]; then
+  rm -rf "$abs_dest"
+  cp -r "$src" "$abs_dest"
+else
+  cp "$src" "$abs_dest"
+fi
+
+echo "added: $dest -> $src"
+echo "run: git add $dest symlinks"
