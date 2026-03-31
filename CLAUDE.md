@@ -4,6 +4,7 @@ This repo bootstraps work environment on Ubuntu VPS
 
 ```
 git config core.hooksPath .githooks
+git ls-files | xargs -I{} sh -c 'test -L {} && git update-index --skip-worktree {}' 2>/dev/null; true
 ```
 
 `shell/` and `tools/` contain symlinks to the local dotfiles. The pre-commit hook
