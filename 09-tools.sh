@@ -26,5 +26,5 @@ ok "Symlinks created"
 # ----------------------------------------
 # 3. Yazi packages (flavors / plugins)
 # ----------------------------------------
-ya pack -i
+ya pkg --install
 ok "Yazi packages installed"
