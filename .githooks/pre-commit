@@ -13,16 +13,17 @@ resolve_target() {   # <abs-symlink-path> → prints absolute target path
 }
 
 symlink_parent_target() {   # <repo-relative-path> → prints actual file path
-  local rel="$1" prefix="" part
-  while IFS= read -r part; do
-    prefix="${prefix:+$prefix/}$part"
-    if [[ -L "$REPO_ROOT/$prefix" ]]; then
+  local rel="$1" dir
+  dir=$(dirname "$rel")
+  while [[ "$dir" != "." ]]; do
+    if [[ -L "$REPO_ROOT/$dir" ]]; then
       local base
-      base=$(resolve_target "$REPO_ROOT/$prefix")
-      echo "$base/${rel#$prefix/}"
+      base=$(resolve_target "$REPO_ROOT/$dir")
+      echo "$base/${rel#$dir/}"
       return 0
     fi
-  done < <(echo "$rel" | tr '/' '\n' | head -n -1)
+    dir=$(dirname "$dir")
+  done
   return 1
 }
 
