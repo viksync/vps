@@ -11,6 +11,7 @@ source "$REPO_DIR/utils.sh"
 # ----------------------------------------
 mkdir -p \
   "$HOME/.config/p10k" \
+  "$HOME/.config/shell/aliases" \
   "$HOME/.config/shell/functions" \
   "$HOME/.cache/zsh" \
   "$HOME/.local/bin" \
@@ -20,11 +21,15 @@ ok "Directories ready"
 # ----------------------------------------
 # 2. Symlinks
 # ----------------------------------------
-symlink "$SHELL_DIR/zprofile"    "$HOME/.zprofile"
-symlink "$SHELL_DIR/zshenv"      "$HOME/.zshenv"
-symlink "$SHELL_DIR/zshrc"       "$HOME/.zshrc"
-symlink "$SHELL_DIR/p10k.zsh"    "$HOME/.config/p10k/p10k.zsh"
-symlink "$SHELL_DIR/aliases.zsh" "$HOME/.config/shell/aliases.zsh"
+symlink "$SHELL_DIR/zprofile"        "$HOME/.zprofile"
+symlink "$SHELL_DIR/zshenv"          "$HOME/.zshenv"
+symlink "$SHELL_DIR/zshrc"           "$HOME/.zshrc"
+symlink "$SHELL_DIR/zshrc.base"      "$HOME/.config/shell/zshrc.base"
+symlink "$SHELL_DIR/p10k.zsh"        "$HOME/.config/p10k/p10k.zsh"
+symlink "$SHELL_DIR/aliases.zsh"     "$HOME/.config/shell/aliases.zsh"
+symlink "$SHELL_DIR/aliases.base.zsh" "$HOME/.config/shell/aliases.base.zsh"
+
+symlink "$SHELL_DIR/aliases/portable" "$HOME/.config/shell/aliases/portable"
 
 ok "Symlinks created"
 
