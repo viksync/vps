@@ -1,1 +1,2 @@
-/Users/vic/.config/yazi/yazi.toml
+[mgr]
+ratio = [1, 1, 3]

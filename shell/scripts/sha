@@ -1,0 +1,21 @@
+#!/bin/bash
+# Verifies a file's SHA256 checksum against an expected value.
+
+# Check if exactly 2 parameters are passed
+if [ "$#" -ne 2 ]; then
+  echo "Usage: $0 <file> <expected_checksum>"
+  exit 1
+fi
+
+file=$1
+expected_checksum=$2
+
+# Calculate the sha256 checksum of the file
+local_checksum=$(sha256sum "$file" | awk '{print $1}')
+
+# Compare checksums
+if [ "$local_checksum" = "$expected_checksum" ]; then
+  echo "Checksum matches."
+else
+  echo "Checksum does not match."
+fi

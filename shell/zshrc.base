@@ -1,1 +1,147 @@
-/Users/vic/.config/shell/zshrc.base
+if [[ -z "$ZELLIJ" ]]; then
+  zellij
+fi
+
+# ----------------------------------------
+# Zinit Plugin Manager
+# ----------------------------------------
+
+source "$HOME/.local/share/zinit/zinit.git/zinit.zsh"
+autoload -Uz _zinit
+(( ${+_comps} )) && _comps[zinit]=_zinit
+unalias zi 2>/dev/null
+
+
+# ----------------------------------------
+# Plugin and Theme Loading
+# ----------------------------------------
+
+zinit light romkatv/powerlevel10k
+[[ -f $HOME/.config/p10k/p10k.zsh ]] && source $HOME/.config/p10k/p10k.zsh
+
+zinit light "zsh-users/zsh-autosuggestions"
+zinit light "zsh-users/zsh-syntax-highlighting"
+zinit light "Aloxaf/fzf-tab"
+zinit light zsh-users/zsh-completions
+
+
+# ----------------------------------------
+# Initialize Zsh Completion System
+# ----------------------------------------
+
+# Platform-specific fpath additions (brew on mac, etc.) — load before compinit
+[[ -f $HOME/.config/shell/zshrc.completions.zsh ]] && source $HOME/.config/shell/zshrc.completions.zsh
+
+if type docker &>/dev/null; then
+  fpath=($HOME/.docker/completions $fpath)
+fi
+
+# rust/cargo completions (one-time setup: rustup completions zsh > ~/.zfunc/_rustup && rustup completions zsh cargo > ~/.zfunc/_cargo)
+fpath+="$HOME/.zfunc"
+
+# Initialize the completion system
+ZSH_COMPDUMP=${XDG_CACHE_HOME:-$HOME/.cache}/zsh/zcompdump-$HOST
+
+# Disable ownership check — configs are intentionally shared across users
+ZSH_DISABLE_COMPFIX=true
+autoload -Uz compinit
+
+# Load completions from cache, but regenerate if cache is more than a day old.
+if [[ -n "$ZSH_COMPDUMP"(.om[1]) ]]; then
+  compinit -u
+else
+  compinit -uC
+fi
+
+# Enable case-insensitive completion
+zstyle ':completion:*' matcher-list 'm:{a-zA-Z}={A-Za-z}'
+
+
+# ----------------------------------------
+# History
+# ----------------------------------------
+
+setopt appendhistory         # save commands to history file
+unsetopt sharehistory        # critical: don't merge session histories (breaks filters)
+
+# --- Cleanup & dedupe ---
+setopt hist_ignore_space     # ignore commands starting with space
+setopt hist_ignore_dups      # ignore duplicates of the previous command
+setopt hist_ignore_all_dups  # remove older duplicate commands
+setopt hist_find_no_dups     # don't display duplicates when searching history
+setopt hist_save_no_dups     # don't write dupes to file
+setopt hist_reduce_blanks    # strip extra spaces
+
+HISTSIZE=5000
+SAVEHIST=$HISTSIZE
+HISTFILE=$HOME/.config/shell/zsh_history
+
+
+# ----------------------------------------
+# Key Bindings
+# ----------------------------------------
+bindkey -v  # vi mode
+bindkey '^k' history-search-backward
+bindkey '^j' history-search-forward
+bindkey '^_' autosuggest-execute
+
+# ----------------------------------------
+# Tools
+# ----------------------------------------
+
+# Cache eval output to avoid console output during p10k instant prompt.
+# Regenerates automatically when the binary is newer than the cache.
+_zsh_cache="${XDG_CACHE_HOME:-$HOME/.cache}/zsh"
+[[ -d "$_zsh_cache" ]] || mkdir -p "$_zsh_cache"
+
+_eval_cached() {
+  local cache="$_zsh_cache/$1.zsh"
+  if [[ ! -f "$cache" || "${commands[$2]}" -nt "$cache" ]]; then
+    "${@:2}" > "$cache" 2>/dev/null || { rm -f "$cache"; return 1; }
+  fi
+  source "$cache"
+}
+
+_eval_cached fzf    fzf --zsh
+_eval_cached zoxide zoxide init zsh
+(( ${+commands[ngrok]} )) && _eval_cached ngrok ngrok completion
+
+# Zellij's completion script calls `_zellij "$@"` at top-level, which errors outside
+# a completion context. Post-process it to use compdef instead.
+{
+  local _zc="$_zsh_cache/zellij.zsh"
+  if [[ ! -f "$_zc" || "${commands[zellij]}" -nt "$_zc" ]]; then
+    zellij setup --generate-completion zsh 2>/dev/null \
+      | sed 's/^_zellij "\$@"$/compdef _zellij zellij/' > "$_zc" \
+      || rm -f "$_zc"
+  fi
+  [[ -f "$_zc" ]] && source "$_zc"
+}
+
+unfunction _eval_cached
+
+
+# ----------------------------------------
+# Aliases & Functions
+# ----------------------------------------
+
+source $HOME/.config/shell/aliases.zsh
+setopt extended_glob
+for f in $HOME/.config/shell/functions/*.(sh|zsh)(.N); do source "$f"; done
+
+
+# ----------------------------------------
+# Completions
+# ----------------------------------------
+
+zstyle ':fzf-tab:complete:cd:*' fzf-preview 'eza -1 --color=always $realpath'
+zstyle ':fzf-tab:complete:z:*' fzf-preview 'eza -1 --color=always $realpath'
+zstyle ':fzf-tab:complete:ls:*' fzf-preview 'eza -1 --color=always $realpath'
+zstyle ':fzf-tab:complete:e:*' fzf-preview 'eza -1 --color=always $realpath'
+
+
+# ----------------------------------------
+# Dev tools
+# ----------------------------------------
+
+[ -s "$HOME/.bun/_bun" ] && source "$HOME/.bun/_bun"

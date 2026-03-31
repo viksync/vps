@@ -1,0 +1,14 @@
+#!/bin/bash
+# Creates a new executable script file and opens it in nvim.
+
+file="$1"
+if [[ -z "$file" ]]; then
+  echo "Create an executable script and opens vim"
+  echo "Usage: cs <filename>"
+  exit 1
+fi
+if [[ -e "$file" ]]; then
+  echo "Error: File '$file' already exists"
+  exit 1
+fi
+touch "$file" && chmod +x "$file" && nvim "$file"
