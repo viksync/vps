@@ -107,3 +107,31 @@ if as_user bash -c 'command -v http &>/dev/null'; then
 else
   spin "Installing httpie" as_user pipx install httpie
 fi
+
+# ----------------------------------------
+# 8. Bun
+# ----------------------------------------
+if [[ -x "$_bin/bun" ]]; then
+  ok "bun already installed"
+else
+  spin "Installing bun" \
+    as_user bash -c 'curl -fsSL https://bun.sh/install | bash'
+  ln -sf "/home/$VPS_USER/.bun/bin/bun" "$_bin/bun"
+  chown -h "$VPS_USER:$VPS_USER" "$_bin/bun"
+fi
+
+# ----------------------------------------
+# 9. Claude Code CLI
+# ----------------------------------------
+if [[ -x "$_bin/claude" ]]; then
+  ok "claude already installed"
+else
+  spin "Installing claude" \
+    as_user bash -c 'curl -fsSL https://claude.ai/install.sh | bash'
+  # Symlink into ~/.local/bin if the installer didn't place it there
+  if [[ ! -x "$_bin/claude" ]]; then
+    _claude_bin=$(as_user bash -c 'command -v claude 2>/dev/null || true')
+    [[ -n "$_claude_bin" ]] && ln -sf "$_claude_bin" "$_bin/claude" && \
+      chown -h "$VPS_USER:$VPS_USER" "$_bin/claude"
+  fi
+fi

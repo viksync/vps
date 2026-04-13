@@ -1,10 +1,10 @@
-# ===============================
-# GIT
-# ===============================
-
 g() {
   git "$@"
 }
+
+#------------------------
+#       Status
+# -----------------------
 
 gs() {
   git status -s "$@"
@@ -13,6 +13,10 @@ gs() {
 gsl() {
   git status "$@"
 }
+
+#------------------------
+#       Logs
+# -----------------------
 
 gl() {
   git log "$@"
@@ -34,6 +38,27 @@ glot() {
   git log --all --author="$(git config user.name)" --since=midnight --oneline
 }
 
+
+#------------------------
+#       Switch
+# -----------------------
+
+gsw() {
+  git switch "$@"
+}
+
+gswc() {
+  git switch -c "$@"
+}
+
+g-() {
+  git switch -
+}
+
+#------------------------
+#       Push/Pull
+# -----------------------
+
 gp() {
   git push "$@"
 }
@@ -42,12 +67,24 @@ gpl() {
   git pull "$@"
 }
 
-ga() {
-  git add "$@"
+gps () {
+    git push && return 0
+
+    local branch
+    branch=$(git branch --show-current)
+
+    if [[ -n "$branch" ]]; then
+        echo "⚡ Setting upstream for $branch"
+        git push --set-upstream origin "$branch"
+    fi
 }
 
-gam() {
-  git commit -a -m "$@"
+#------------------------
+#       Add
+# -----------------------
+
+ga() {
+  git add "$@"
 }
 
 gaa() {
@@ -58,35 +95,108 @@ gar() {
   git add . "$@"
 }
 
-gu() {
+gau() {
   git add -u "$@"
 }
+
+
+#------------------------
+#       Stash
+# -----------------------
+
+gst() {
+  git stash
+}
+
+gstp() {
+  git stash pop
+}
+
+gstl() {
+  git stash list
+}
+
+gstp() {
+  git stash push -m "$@"
+}
+
+#------------------------
+#       Commit
+# -----------------------
+
+gcm() {
+  git commit -m "$@"
+}
+
+gcam() {
+  git commit -a -m "$@"
+}
+
+gca() {
+  git commit --ammend "$@"
+}
+
+gcan() {
+  git commit -a --amend --no-edit "$@"
+}
+
+
+#------------------------
+#       Merge
+# -----------------------
+
+gm() {
+  git merge "$@"
+}
+
+gmf() {
+  git merge --ff-only "$@"
+}
+
+gmnf() {
+  git merge --no-ff "$@"
+}
+
+#------------------------
+#       Reset
+# -----------------------
+
+gr() {
+  git reset "$@"
+}
+
+grs() {
+  local target="HEAD"
+  [[ -n "$1" ]] && target="HEAD~$1"
+  git reset --soft "$target"
+}
+
+grh() {
+  local target="HEAD"
+  [[ -n "$1" ]] && target="HEAD~$1"
+  git reset --hard "$target"
+}
+
+#------------------------
+#       Config
+# -----------------------
 
 gsc() {
   git config --list --show-origin "$@"
 }
 
-gan() {
-  git commit -a --amend --no-edit "$@"
+#------------------------
+#       Worktrees
+# -----------------------
+
+gwa() {
+  git worktree add "$@"
 }
 
-gps() {
-  local output
-  output=$(git push 2>&1)
-  local status=$?
+gwr() {
+  git worktree remove "$@"
+}
 
-  echo "$output"
-
-  if [[ $status -ne 0 ]]; then
-    local cmd
-    cmd=$(echo "$output" | grep -Eo "git push --set-upstream origin [^[:space:]]+")
-
-    if [[ -n "$cmd" ]]; then
-      echo "\n⚡ Running suggested upstream command:"
-      echo "$cmd"
-      eval "$cmd"
-    fi
-  fi
-
-  return $status
+gwl() {
+  git worktree list
 }

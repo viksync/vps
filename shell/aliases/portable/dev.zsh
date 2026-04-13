@@ -40,3 +40,11 @@ dcu() {
   docker compose up
 }
 
+
+#------------------------
+#       Other
+# -----------------------
+
+tsn() {
+  npx tsc --noEmit
+}
