@@ -135,3 +135,23 @@ else
       chown -h "$VPS_USER:$VPS_USER" "$_bin/claude"
   fi
 fi
+
+# ----------------------------------------
+# 10. Codex CLI
+# ----------------------------------------
+if [[ -x "$_bin/codex" ]]; then
+  ok "codex already installed"
+else
+  spin "Installing codex" \
+    as_user bash -c 'curl -fsSL https://chatgpt.com/codex/install.sh | sh'
+fi
+
+# ----------------------------------------
+# 11. pnpm
+# ----------------------------------------
+if as_user bash -c 'command -v pnpm &>/dev/null'; then
+  ok "pnpm already installed"
+else
+  spin "Installing pnpm" \
+    as_user bash -c 'curl -fsSL https://get.pnpm.io/install.sh | sh -'
+fi
