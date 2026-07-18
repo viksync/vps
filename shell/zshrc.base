@@ -20,7 +20,6 @@ zinit light "zsh-users/zsh-syntax-highlighting"
 zinit light "Aloxaf/fzf-tab"
 zinit light zsh-users/zsh-completions
 
-
 # ----------------------------------------
 # Initialize Zsh Completion System
 # ----------------------------------------
@@ -123,7 +122,7 @@ unfunction _eval_cached
 
 source $HOME/.config/shell/aliases.zsh
 setopt extended_glob
-for f in $HOME/.config/shell/functions/*.(sh|zsh)(.N); do source "$f"; done
+#for f in $HOME/.config/shell/functions/*.(sh|zsh)(.N); do source "$f"; done
 
 
 # ----------------------------------------

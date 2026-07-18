@@ -42,3 +42,5 @@ export OTEL_METRIC_EXPORT_INTERVAL=10000
 # 10 seconds (default: 60000ms)
 export OTEL_LOGS_EXPORT_INTERVAL=5000
 # 5 seconds (default: 5000ms)
+
+. "$HOME/.vite-plus/env"

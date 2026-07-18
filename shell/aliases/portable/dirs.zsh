@@ -7,7 +7,7 @@ md() {
 }
 
 # create dir and cd to it
-function mdc() {
+mdc() {
   mkdir -p "$1" && cd "$1"
 }
 

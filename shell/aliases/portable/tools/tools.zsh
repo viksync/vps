@@ -3,12 +3,12 @@
 # ===============================
 
 # open without changing current dir
-y() {
-  yazi "$@"
-}
+# ya() {
+#   yazi "$@"
+# }
 
 # change the dir to chosen in yazi
-function yy() {
+function y() {
 	local tmp="$(mktemp -t "yazi-cwd.XXXXXX")"
 	yazi "$@" --cwd-file="$tmp"
 	if cwd="$(cat -- "$tmp")" && [ -n "$cwd" ] && [ "$cwd" != "$PWD" ]; then
@@ -30,19 +30,15 @@ hl() {
   http localhost:3000$1
 }
 
+ph() {
+  local url
 
-# ===============================
-# processes
-# ===============================
+  url=$(pbpaste)
 
-psp() {
-  ps -p $1 -o pid,ppid,user,command
-}
+  if [[ -z "$url" ]]; then
+    echo "Clipboard is empty"
+    return 1
+  fi
 
-# ===============================
-# ZELLIJ
-# ===============================
-
-ze() {
-  zellij "$@"
+  s yt-dlp "$url" -P ~/Movies/ph
 }
